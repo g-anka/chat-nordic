@@ -4,11 +4,17 @@ import FileUpload from "../../components/FileUpload"
 import Location from "../../components/Location"
 
 function MessageForm({ onSubmit }) {
-    const { register, handleSubmit, setValue } = useForm()
+    const { register, handleSubmit, setValue, watch } = useForm()
+    const location = watch('location')
+    const imageURL = watch('imageURL')
+
+    console.log("img", imageURL)
 
     const onFormSubmit = (data) => {
         onSubmit(data)
         setValue('text', '')
+        setValue('imageURL', null)
+        setValue('location', null)
     }
 
     const handleKeyDown = (event) => {
@@ -21,14 +27,18 @@ function MessageForm({ onSubmit }) {
         setValue ('imageURL', imageURL)
     }
 
-    const handleLocation = (location) => {
-        setValue('location', location)
+    const handleLocationChange = (location) => {
+        setValue ('location', location)
     }
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)}>
             <div className="mb-2">
-                <FormControl type="text" placeholder="Ваше имя" {...register('name')} />
+                <FormControl
+                    type="text"
+                    placeholder="Ваше имя"
+                    {...register('name')}
+                />
             </div>
             <div className="mb-2">
                 <FormControl
@@ -39,10 +49,18 @@ function MessageForm({ onSubmit }) {
                 />
             </div>
             <div className="mb-2">
-                <FileUpload onUpload={handleImageSubmit} {...register('imageURL')} />
+                <FileUpload
+                    {...register('imageURL')}
+                    onUpload={handleImageSubmit}
+                    value={imageURL}
+                />
             </div>
             <div className="mb-2">
-                <Location onLocation={handleLocation} {...register('locationL')}/>
+                <Location
+                    {...register('location')}
+                    onChange={handleLocationChange}
+                    value={location}
+                />
             </div>
             <Button type="submit">Отправить</Button>
         </form>
