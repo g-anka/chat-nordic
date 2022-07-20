@@ -1,12 +1,19 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { useDispatch, useSelector } from "react-redux"
-import { getMessages, selectMessages, connect, submitMessage } from "../features/chats/messagesSlice"
-import Message from "../features/chats/Message"
-import MessageForm from "../features/chats/MessageForm"
+import { useDispatch, useSelector } from 'react-redux'
+import { useAuth0 } from '@auth0/auth0-react'
+import {
+    getMessages,
+    selectMessages,
+    connect,
+    submitMessage,
+} from '../features/chats/messagesSlice'
+import Message from '../features/chats/Message'
+import MessageForm from '../features/chats/MessageForm'
 import styled from 'styled-components'
 
 function Chat() {
+    const { user, isAuthenticated } = useAuth0()
     const { chatId } = useParams()
     const dispatch = useDispatch()
     const messages = useSelector(selectMessages)
@@ -22,15 +29,17 @@ function Chat() {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight
     }, [messages])
 
-    const handleSubmit = ({ name, text, imageURL, location }) => {
-        const message = {
-            chatId,
-            name,
-            text,
-            imageURL,
-            location,
+    const handleSubmit = ({ text, imageURL, location }) => {
+        if(user) {
+            const message = {
+                chatId,
+                name: user.name,
+                text,
+                imageURL,
+                location,
+            }
+            dispatch(submitMessage(message))
         }
-        dispatch(submitMessage(message))
     }
 
     return (
@@ -43,7 +52,11 @@ function Chat() {
                     </div>
                 ))}
             </SMessages>
-            <MessageForm onSubmit={handleSubmit} />
+            {isAuthenticated ? (
+                <MessageForm onSubmit={handleSubmit} />
+            ) : (
+                <div>Вы не авторизованы</div>
+            )}
         </div>
     )
 }
